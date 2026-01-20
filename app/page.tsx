@@ -1,5 +1,6 @@
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
+import { ProgramHighlights } from "@/components/program-highlights"
 import { About } from "@/components/about"
 import { Programs } from "@/components/programs"
 import { Impact } from "@/components/impact"
@@ -13,6 +14,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <ProgramHighlights />
         <About />
         <Programs />
         <Impact />

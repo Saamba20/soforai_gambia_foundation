@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect } from "react"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Heart } from "lucide-react"
@@ -15,136 +16,137 @@ const navLinks = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState("")
+  const [activeSection, setActiveSection] = useState<string | null>(null)
 
+  /* Sticky background */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
-      // Scroll Spy Logic
-      const sections = navLinks.map(link => link.href.substring(1))
-      const currentSection = sections.find(id => {
-        const element = document.getElementById(id)
-        if (element) {
-          const rect = element.getBoundingClientRect()
-          return rect.top <= 100 && rect.bottom >= 100
-        }
-        return false
-      })
-
-      if (currentSection) {
-        setActiveSection(`#${currentSection}`)
-      } else if (window.scrollY < 100) {
-        setActiveSection("")
+  /* Scroll-spy (stable) */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`)
+          }
+        })
+      },
+      {
+        rootMargin: "-50% 0px -50% 0px",
+        threshold: 0,
       }
-    }
+    )
 
-    window.addEventListener("scroll", handleScroll)
-    // Initial check
-    handleScroll()
-    return () => window.removeEventListener("scroll", handleScroll)
+    navLinks.forEach((link) => {
+      const el = document.getElementById(link.href.substring(1))
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
   }, [])
 
   return (
-    <header 
+    <header
       className={cn(
         "sticky top-0 z-50 transition-all duration-300",
-        scrolled 
-          ? "bg-card/90 backdrop-blur-md border-b border-border py-2 shadow-sm" 
-          : "bg-transparent py-4"
+        scrolled
+          ? "bg-background/90 backdrop-blur border-b"
+          : "bg-transparent"
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-16">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
-              scrolled ? "bg-primary" : "bg-primary/20 backdrop-blur-md border border-primary/30"
-            )}>
-              <Heart className={cn(
-                "w-5 h-5 transition-colors",
-                scrolled ? "text-primary-foreground" : "text-primary"
-              )} />
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <Heart className="w-4 h-4 text-primary-foreground" />
             </div>
-            <div className="flex flex-col">
-              <span className={cn(
-                "font-bold text-sm md:text-base leading-tight transition-colors",
-                scrolled ? "text-foreground" : "text-white"
-              )}>
-                SOFORAI GAMBIA
-              </span>
-              <span className={cn(
-                "text-xs leading-tight transition-colors",
-                scrolled ? "text-muted-foreground" : "text-zinc-300/80"
-              )}>
-                FOUNDATION
-              </span>
+            <div className="leading-tight">
+              <div className="font-bold text-sm">SOFORAI GAMBIA</div>
+              <div className="text-xs text-muted-foreground">FOUNDATION</div>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav */}
+          <nav
+            className="hidden md:flex gap-8"
+            aria-label="Primary Navigation"
+          >
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
+                aria-current={
+                  activeSection === link.href ? "page" : undefined
+                }
                 className={cn(
-                  "text-sm font-semibold transition-all duration-200 relative py-1",
+                  "relative text-sm font-medium transition-colors",
                   activeSection === link.href
-                    ? "text-primary scale-105"
-                    : scrolled ? "text-muted-foreground hover:text-primary" : "text-zinc-300 hover:text-white"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
                 )}
               >
                 {link.label}
-                {activeSection === link.href && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary animate-in fade-in zoom-in-50 duration-300" />
-                )}
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 w-full bg-primary transition-transform duration-300 origin-left",
+                    activeSection === link.href
+                      ? "scale-x-100"
+                      : "scale-x-0"
+                  )}
+                />
               </a>
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
-            <Button asChild className={cn(
-              "hidden sm:inline-flex transition-all duration-300",
-              !scrolled && "bg-primary/90 hover:bg-primary border border-primary/20"
-            )}>
-              <Link href="#donate">Donate Now</Link>
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <Button asChild className="hidden sm:inline-flex">
+              <Link href="#donate">Donate</Link>
             </Button>
+
             <button
-              type="button"
-              className={cn(
-                "md:hidden p-2 transition-colors",
-                scrolled ? "text-foreground" : "text-white"
-              )}
+              className="md:hidden"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 animate-in slide-in-from-top-4 duration-300">
-            <nav className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-sm font-medium p-3 rounded-lg transition-colors",
-                    activeSection === link.href
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <Button asChild className="w-full mt-4">
-                <Link href="#donate">Donate Now</Link>
-              </Button>
-            </nav>
+          <div
+            id="mobile-menu"
+            role="menu"
+            className="md:hidden py-4 space-y-2"
+          >
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                role="menuitem"
+                aria-current={
+                  activeSection === link.href ? "page" : undefined
+                }
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "block rounded-md px-4 py-2 text-sm transition-colors",
+                  activeSection === link.href
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
         )}
       </div>

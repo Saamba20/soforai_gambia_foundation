@@ -123,3 +123,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 80px; /* sticky header height */
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 3px;
+}
+
+
