@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Heart } from "lucide-react"
+import { Menu, X } from "lucide-react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -62,9 +63,13 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-              <Heart className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <Image
+              src="/logo.jpeg"
+              alt="Soforai Gambia Foundation Logo"
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
             <div className="leading-tight">
               <div className="font-bold text-sm">SOFORAI GAMBIA</div>
               <div className="text-xs text-muted-foreground">FOUNDATION</div>

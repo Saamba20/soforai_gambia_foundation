@@ -18,7 +18,7 @@ export const programs = [
     icon: Stethoscope,
     title: "Healthcare Services",
     description: "Offering free medical consultations, health screenings, and essential medications to communities in need.",
-    image: "/02.jpg",
+    image: "/education.jpg",
     href: "/programs/healthcare",
     fullStory: "The Healthcare Services initiative brings vital medical care directly to the heart of underserved communities. Through our free medical camps, we provide consultations with qualified healthcare professionals who offer diagnosis and treatment for common ailments. Our health screening programs focus on early detection of chronic conditions like hypertension and diabetes. We also maintain a medicine distribution network to provide essential prescriptions to those who cannot afford them. A key component of our program is health education, empowering individuals with the knowledge to maintain their well-being and prevent disease through improved hygiene and nutrition."
   },
@@ -27,7 +27,7 @@ export const programs = [
     icon: Briefcase,
     title: "Skills Training",
     description: "Empowering youth and adults with vocational skills to enhance their employment opportunities.",
-    image: "/01.jpg",
+    image: "/02.jpg",
     href: "/programs/skills",
     fullStory: "Our Skills Training program is designed to bridge the gap between education and employment. We offer hands-on vocational training in high-demand fields such as tailoring, carpentry, and electrical work. For aspiring business owners, our entrepreneurship workshops provide essential knowledge in financial management, marketing, and business planning. In an increasingly digital world, we provide digital literacy courses to ensure our participants can navigate the modern workplace. Our job placement support connects graduates with local employers, providing a pathway to financial independence and community contribution."
   },
@@ -36,7 +36,7 @@ export const programs = [
     icon: Home,
     title: "Community Development",
     description: "Building infrastructure and improving living conditions in underserved communities across The Gambia.",
-    image: "/education.jpg",
+    image: "/01.jpg",
     href: "/programs/community",
     fullStory: "Community Development at Soforai Gambia Foundation focuses on building the foundations for a better life. We work closely with local leaders to identify and address critical infrastructure needs. Our water well construction projects provide clean, safe drinking water, reducing the incidence of waterborne diseases. We implement sanitation projects to improve public health and build community centers that serve as hubs for education and social gathering. Our environmental initiatives promote sustainable practices and community-led conservation efforts, ensuring that development today does not compromise the resources of tomorrow."
   },
@@ -54,7 +54,7 @@ export const programs = [
     icon: GraduationCap,
     title: "Women Empowerment",
     description: "Supporting women through education, skills training, and micro-finance opportunities.",
-    image: "/01.jpg",
+    image: "/volunteer.jpg",
     href: "/programs/women-empowerment",
     fullStory: "The Women Empowerment program recognizes that empowering women is key to transforming whole communities. We support women's education through literacy programs and specialized vocational training tailored to their needs and market opportunities. Our micro-loan program provides the capital necessary for women to start or expand small businesses, fostering financial independence. We accompany these loans with business training in bookkeeping and management. Perhaps most importantly, we facilitate support groups where women can share experiences, build networks, and advocate for their rights within their communities."
   },
