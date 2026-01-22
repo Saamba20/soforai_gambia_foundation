@@ -1,12 +1,19 @@
 "use client"
 
 import React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Heart, CreditCard, Building, Smartphone } from "lucide-react"
+import { Heart, CreditCard, Building, Smartphone, CheckCircle2, Copy } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 const donationAmounts = [25, 50, 100, 250, 500]
 
@@ -21,6 +28,9 @@ export function Donate() {
   const [customAmount, setCustomAmount] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [formData, setFormData] = useState({ name: "", email: "", message: "" })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [submittedAmount, setSubmittedAmount] = useState(0)
 
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount)
@@ -32,10 +42,53 @@ export function Donate() {
     setSelectedAmount(null)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    
     const amount = selectedAmount || Number.parseInt(customAmount) || 0
-    alert(`Thank you for your generous donation of $${amount}! We will process your ${paymentMethod} payment shortly.`)
+    
+    if (amount <= 0) {
+      toast.error("Please enter a valid donation amount")
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const response = await fetch("/api/donate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          amount,
+          paymentMethod,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to submit donation intent")
+      }
+
+      setSubmittedAmount(amount)
+      setShowSuccessDialog(true)
+      toast.success("Donation intent submitted successfully!")
+      
+      // Reset form
+      setFormData({ name: "", email: "", message: "" })
+      setSelectedAmount(100)
+      setCustomAmount("")
+    } catch (error) {
+      console.error("Donation Error:", error)
+      toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success(`${label} copied to clipboard`)
   }
 
   return (
@@ -84,6 +137,7 @@ export function Donate() {
                   value={customAmount}
                   onChange={handleCustomAmountChange}
                   className="pl-8"
+                  min="1"
                 />
               </div>
             </div>
@@ -144,9 +198,18 @@ export function Donate() {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full">
-              <Heart className="w-5 h-5 mr-2" />
-              Donate ${selectedAmount || customAmount || 0} Now
+            <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></span>
+                  Processing...
+                </div>
+              ) : (
+                <>
+                  <Heart className="w-5 h-5 mr-2" />
+                  Donate ${selectedAmount || customAmount || 0} Now
+                </>
+              )}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground mt-4">
@@ -155,6 +218,86 @@ export function Donate() {
           </form>
         </div>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex justify-center mb-4">
+              <CheckCircle2 className="w-16 h-16 text-primary animate-in zoom-in duration-300" />
+            </div>
+            <DialogTitle className="text-center text-2xl font-bold">Thank You!</DialogTitle>
+            <DialogDescription className="text-center text-base">
+              We've received your intent to donate <span className="font-bold text-foreground">${submittedAmount}</span>. 
+              Please follow the instructions below to complete your payment.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-6">
+            {paymentMethod === "card" && (
+              <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
+                <p className="text-sm text-foreground font-medium mb-2">Card Payment Follow-up</p>
+                <p className="text-sm text-muted-foreground">
+                  Our team will contact you at <strong>{formData.email}</strong> with a secure link to complete your card transaction.
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === "bank" && (
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Building className="w-4 h-4" /> Bank Account Details
+                </p>
+                <div className="bg-background border border-border rounded-lg p-3 space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Bank Name:</span>
+                    <span className="font-medium">GTBank Gambia</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Account Name:</span>
+                    <span className="font-medium uppercase">Soforai Gambia Foundation</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Account Number:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold">204 266 250 110</span>
+                      <button onClick={() => copyToClipboard("204 266 250 110", "Account Number")} className="text-primary hover:text-primary/80">
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {paymentMethod === "mobile" && (
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Smartphone className="w-4 h-4" /> Mobile Money Details
+                </p>
+                <div className="bg-background border border-border rounded-lg p-3 space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Provider:</span>
+                    <span className="font-medium">QMoney / Africell</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Phone Number:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold">+220 333 4444</span>
+                      <button onClick={() => copyToClipboard("+220 333 4444", "Phone Number")} className="text-primary hover:text-primary/80">
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Button onClick={() => setShowSuccessDialog(false)} className="w-full">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }
